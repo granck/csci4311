@@ -12,12 +12,13 @@
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class SpanningTree_v2{
 
 	public static void main(String[] args){
-
-		String fileName = "input.txt";
+		
+		String fileName = args[0];
 		String line = null; //line read from buffer
 		int lineNum = 1;
 		ArrayList<Integer> connectionPairs;
@@ -155,6 +156,40 @@ public class SpanningTree_v2{
 	//returns Integer arraylist of switch connections;
 	private static ArrayList<Integer> randomConfig(int numOfSwitches){
 		ArrayList<Integer> connections = new ArrayList<Integer>();
+		Random random = new Random();
+		int randomValue;
+		
+		//add 16 values, or 8 pairs of connections to arrayList connections
+		for(int x = 0; x < 12; x++){
+			randomValue = random.nextInt(numOfSwitches -1) + 1;
+
+			//if second value in pair of connections
+			//ensure it isn't same as first value
+			if(x % 2 == 1){
+				while(connections.get(x-1) == randomValue){
+					randomValue = random.nextInt(numOfSwitches - 1) + 1;
+				}//end while
+			}//end if
+			
+			System.out.println("Adding " + randomValue + " to connections");
+			connections.add(randomValue);
+		}//end for
+
+		//check that all switches are used
+		//if switch isn't used, add connection pair
+		//		with it and random switch
+		for(int x = 0; x < numOfSwitches; x++){
+			if(connections.contains(x + 1) == false){
+				connections.add(x + 1);
+				randomValue = random.nextInt(numOfSwitches -1) + 1;
+				while(connections.get(connections.size() - 1) == randomValue){
+					randomValue = random.nextInt(numOfSwitches - 1) + 1;
+				}//end while
+				connections.add(randomValue);
+			}//end if
+
+		}//end for
+
 		return connections;
 	}//end method randomConfig
 
@@ -168,6 +203,8 @@ public class SpanningTree_v2{
 
 	//returns string arraylist of switch connections
 	//** with additional connections if a switch was unused
+	//
+	//** Not needed
 	private static ArrayList<Integer> allSwitchCheck(ArrayList<Integer> connections, int numOfConnections){
 		ArrayList<Boolean> connectionUsed = new ArrayList<Boolean>(numOfConnections);
 
