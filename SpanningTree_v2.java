@@ -45,12 +45,14 @@
 				//if random (connections are not provided) 
 				//make set of connections
 				if(lineArray[1].equals("R")){
+
 					connectionPairs = randomConfig(numOfSwitches);
 					System.out.println(connectionPairs);
 				}
 				
 				//else not random, connections are provided
 				else{
+
 					//parse connections from strings to integer pairs
 					int numOfConnections = lineArray.length - 1;
 					System.out.println("Number of connectin pairs: " +  numOfConnections);
@@ -66,11 +68,23 @@
 
 				//once connection pairs are made, create SwitchConnection object array
 				// which holds switches 1 - x within array as index 0 - (x -1)
-
 				SwitchConnection[] switches = new SwitchConnection[numOfSwitches];
 				for(int x = 0; x < numOfSwitches; x++){
-					switches[x].setRoot(x + 1);
-					System.out.println("root of switch " + x + ": " + switches[0].getRoot());
+
+					switches[x] = new SwitchConnection(); //initialize all SwitchConnection objects
+					switches[x].setRoot(x + 1); //initially set their roots to self
+					switches[x].setDistanceToRoot(0);
+					switches[x].setConnectedBy(x + 1);
+					System.out.println("\nSwitch " + (x + 1) +  "\nRoot:" + switches[x].getRoot() +
+						"\nDistance to Root: " + switches[x].getDistance() + "\nConnectedBy: " + switches[x].getConnection());
+				}//end for
+				
+				//add each connection pair to corresponding switches in array
+				for(int x = 0; x < connectionPairs.size(); x+=2){
+					switches[connectionPairs.getIndex(x)].addConnection(connectionPairs.getIndex(x+1));
+					switches[connectionPairs.getIndex(x+1)].addConnection(connectionPairs.getIndex(x));
+
+
 				}//end for
 					
 				lineNum++;
@@ -114,7 +128,7 @@
 		return connections;
 	}//end method allSwitchCheck
 
-	 private class SwitchConnection{
+	 private static class SwitchConnection{
 		
 		int root;
 		int distanceToRoot;
@@ -140,7 +154,7 @@
 		}
 
 		private void setDistanceToRoot(int value){
-			distanceToRoot = value + 1;
+			distanceToRoot = value;
 		}
 
 		private void setConnectedBy(int value){
