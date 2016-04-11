@@ -10,20 +10,20 @@
  *
  **/
 
- import java.io.*;
- import java.util.ArrayList;
+import java.io.*;
+import java.util.ArrayList;
 
- public class SpanningTree_v2{
+public class SpanningTree_v2{
 
 	public static void main(String[] args){
-		
+
 		String fileName = "input.txt";
 		String line = null; //line read from buffer
 		int lineNum = 1;
 		ArrayList<Integer> connectionPairs;
 
 		try{
-		
+
 			//open file
 			FileReader fileReader = new FileReader(fileName);
 
@@ -32,12 +32,12 @@
 
 			//read lines so long as buffer has lines to read
 			while((line = bufferReader.readLine()) != null){
-				
+
 				int numOfSwitches; 
 
 				//split line read based on white space
 				String[] lineArray = line.split("\\s+");
-				
+
 				numOfSwitches = Integer.parseInt(lineArray[0]);
 				System.out.println("------------------------------\nLine number: " + lineNum);
 				System.out.println("\n\nNumber of switches: " + numOfSwitches);
@@ -49,7 +49,7 @@
 					connectionPairs = randomConfig(numOfSwitches);
 					System.out.println(connectionPairs);
 				}
-				
+
 				//else not random, connections are provided
 				else{
 
@@ -76,17 +76,68 @@
 					switches[x].setDistanceToRoot(0);
 					switches[x].setConnectedBy(x + 1);
 					System.out.println("\nSwitch " + (x + 1) +  "\nRoot:" + switches[x].getRoot() +
-						"\nDistance to Root: " + switches[x].getDistance() + "\nConnectedBy: " + switches[x].getConnection());
+							"\nDistance to Root: " + switches[x].getDistance() + "\nConnectedBy: " + switches[x].getConnection());
 				}//end for
-				
+
 				//add each connection pair to corresponding switches in array
 				for(int x = 0; x < connectionPairs.size(); x+=2){
-					switches[connectionPairs.getIndex(x)].addConnection(connectionPairs.getIndex(x+1));
-					switches[connectionPairs.getIndex(x+1)].addConnection(connectionPairs.getIndex(x));
-
+					switches[connectionPairs.get(x) - 1].addConnection(connectionPairs.get(x + 1));
+					switches[connectionPairs.get(x + 1) - 1].addConnection(connectionPairs.get(x));
 
 				}//end for
+				
+				//make copy of SwitchConnection array to use for comparison
+				//	when going through cycles for spanning algorithm
+				SwitchConnection[] switchesTemp = new SwitchConnection[numOfSwitches];
+				for(int x = 0; x < numOfSwitches; x++){
+					switchesTemp[x] = new SwitchConnection();
+					switchesTemp[x].copySwitch(switches[x]);
+				}
+				
+				boolean change = true;
+				int iteration = 1;
+				while(change){
+				change = false;
+
+					//cycle through all switches
+					for(int x = 0; x < numOfSwitches; x++){
+						
+						//if current switch doesn't have established route to true root
+						if(switches[x].getRoot() != 1){
+							
+							//cycle through all switches current switch is connected to
+							// if it finds a switch with a smaller root
+							// take it's root
+							for(int y = 0; y < switches[x].getConnectionList().size(); y++){
+								
+								if(switchesTemp[x].getRoot() > switches[switches[x].getConnectionList().get(y) -1].getRoot()){
+									
+									switchesTemp[x].setRoot(switches[switches[x].getConnectionList().get(y) -1].getRoot());
+									switchesTemp[x].setDistanceToRoot(switches[switches[x].getConnectionList().get(y) -1].getDistance() +1);
+									switchesTemp[x].setConnectedBy(switches[x].getConnectionList().get(y));
+									change = true;
+								}//end inner if	
+
+							} //end inner for
+						}//end if
+					}//end for
 					
+					//after cycling through all switches, copy temp array data into
+					//real switchConnection array
+					// **only if change = true, meaning a change has been made
+					if(change == true){
+						System.out.println("\nIteration #" + iteration + " of line " + lineNum);
+						for(int x = 0; x < numOfSwitches; x++){
+							switches[x].copySwitch(switchesTemp[x]);
+							System.out.println("\nSwitch " + (x + 1) +  "\nRoot:" + switches[x].getRoot() +
+							"\nDistance to Root: " + switches[x].getDistance() + "\nConnectedBy: " + (switches[x].getConnection()));
+
+						}//end for
+					}//end if
+					iteration++;
+				}//end while loop
+				
+
 				lineNum++;
 			}//end while
 
@@ -98,15 +149,15 @@
 		catch(IOException ex){
 			System.out.println("Can't read file");
 		}
-	
+
 	}//end main method
-	
+
 	//returns Integer arraylist of switch connections;
 	private static ArrayList<Integer> randomConfig(int numOfSwitches){
 		ArrayList<Integer> connections = new ArrayList<Integer>();
 		return connections;
 	}//end method randomConfig
-	
+
 	//converts String pair representation of connection into two integer values
 	private static int[] parseStringPair(String pair){
 		String[] pairDivided = pair.split("-");
@@ -114,22 +165,22 @@
 		return connectionPair;
 
 	}//end method parseStringPair
-	
+
 	//returns string arraylist of switch connections
 	//** with additional connections if a switch was unused
 	private static ArrayList<Integer> allSwitchCheck(ArrayList<Integer> connections, int numOfConnections){
 		ArrayList<Boolean> connectionUsed = new ArrayList<Boolean>(numOfConnections);
 
 		while(connectionUsed.contains(false)){
-				
+
 
 		}//end while
 
 		return connections;
 	}//end method allSwitchCheck
 
-	 private static class SwitchConnection{
-		
+	private static class SwitchConnection{
+
 		int root;
 		int distanceToRoot;
 		int connectedBy;
@@ -142,7 +193,7 @@
 			distanceToRoot = 0;
 			connectedBy = 0;
 		}//end constructor
-		
+
 		//adds connection to switch
 		private void addConnection(int value){
 			connectedTo.add(value);
@@ -172,11 +223,23 @@
 		private int getConnection(){
 			return connectedBy;
 		}
-		
+
+		private ArrayList<Integer> getConnectionList(){
+			return connectedTo;
+		}//end method getConnectionList
+
 		//returns port number remote value is attached to
 		private int getPortNum(int value){
 			return connectedTo.indexOf(value) + 1;
 		}//end method getPortNum
 
-	 }//end inner private class SwitchConnection
- }//end class SpanningTree_v2
+		private void copySwitch(SwitchConnection switchConnection){
+			this.root = switchConnection.getRoot();
+			this.distanceToRoot = switchConnection.getDistance();
+			this.connectedBy = switchConnection.getConnection();
+			this.connectedTo = switchConnection.getConnectionList();
+
+		}//end method copySwitch
+
+	}//end inner private class SwitchConnection
+}//end class SpanningTree_v2
