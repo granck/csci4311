@@ -3,7 +3,7 @@
  * Garrick Ranck
  * CSCI4311
  * Programming Assignment1
- * SpanningTree_v2.java
+ * SpanningTree.java
  *
  * Calculates the spanning tree algorithm for a set of switches
  * and connections provided or at random.
@@ -14,7 +14,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SpanningTree_v2{
+public class SpanningTree{
 
 	public static void main(String[] args){
 		
@@ -293,4 +293,4 @@ public class SpanningTree_v2{
 		}//end method copySwitch
 
 	}//end inner private class SwitchConnection
-}//end class SpanningTree_v2
+}//end class SpanningTree
