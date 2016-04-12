@@ -38,9 +38,10 @@ public class SpanningTree_v2{
 
 				//split line read based on white space
 				String[] lineArray = line.split("\\s+");
-
+				
+				//first String value denotes number of switches
 				numOfSwitches = Integer.parseInt(lineArray[0]);
-				System.out.println("------------------------------\nLine number: " + lineNum);
+				System.out.println("\n------------------LINE NUMBER: " + lineNum + "------------------");
 				System.out.println("\n\nNumber of switches: " + numOfSwitches);
 
 				//if random (connections are not provided) 
@@ -56,8 +57,8 @@ public class SpanningTree_v2{
 
 					//parse connections from strings to integer pairs
 					int numOfConnections = lineArray.length - 1;
-					//System.out.println("Number of connectin pairs: " +  numOfConnections);
 					connectionPairs = new ArrayList<Integer>();
+
 					for(int x = 1; x <= numOfConnections; x++){
 
 						int[] connectionPair = parseStringPair(lineArray[x]);
@@ -95,8 +96,11 @@ public class SpanningTree_v2{
 					switchesTemp[x].copySwitch(switches[x]);
 				}
 				
-				boolean change = true;
+				boolean change = true; //denotes whether a switch has altered their root or not
 				int iteration = 1;
+
+				//cycle through all switches until no switch finds a smaller root
+				//signalling the end of the spanning algorithm
 				while(change){
 				change = false;
 
@@ -104,11 +108,12 @@ public class SpanningTree_v2{
 					for(int x = 0; x < numOfSwitches; x++){
 						
 						//if current switch doesn't have established route to true root
+						//then check if path to true root can be made
 						if(switches[x].getRoot() != 1){
 							
 							//cycle through all switches current switch is connected to
 							// if it finds a switch with a smaller root
-							// take it's root
+							// take their root
 							for(int y = 0; y < switches[x].getConnectionList().size(); y++){
 								
 								if(switchesTemp[x].getRoot() > switches[switches[x].getConnectionList().get(y) -1].getRoot()){
@@ -137,8 +142,9 @@ public class SpanningTree_v2{
 					}//end if
 					
 					//if all switches have been connected to root
+					//		aka no change has been made
 					if(change == false){
-						System.out.println("\n******Final configuration for line " + lineNum);
+						System.out.println("\n******FINAL configuration for line " + lineNum);
 						for(int x = 0; x < numOfSwitches; x++){
 							
 							//gets port number current switch is using for connection to next switch
@@ -150,7 +156,7 @@ public class SpanningTree_v2{
 							
 							//don't consider root of all switches(it isn't "attached" to self)
 							if(x != 0){
-								System.out.println("\nUsing p" + portCurrent + " of " + (x+1) + 
+								System.out.println("Using p" + portCurrent + " of " + (x+1) + 
 									" and p" + portConnectedTo + " of " + switches[x].getConnection());
 							}//end if
 						}//end for
@@ -163,6 +169,8 @@ public class SpanningTree_v2{
 				lineNum++;
 			}//end while
 
+			bufferReader.close();
+
 		}//end try
 
 		catch(FileNotFoundException ex){
@@ -174,7 +182,8 @@ public class SpanningTree_v2{
 
 	}//end main method
 
-	//returns Integer arraylist of switch connections;
+	//returns Integer arraylist of random switch connections
+	//	*manually adds connections to switches if they are not randomly chosen
 	private static ArrayList<Integer> randomConfig(int numOfSwitches){
 		ArrayList<Integer> connections = new ArrayList<Integer>();
 		Random random = new Random();
@@ -222,26 +231,14 @@ public class SpanningTree_v2{
 
 	}//end method parseStringPair
 
-	//returns string arraylist of switch connections
-	//** with additional connections if a switch was unused
-	//
-	//** Not needed
-	private static ArrayList<Integer> allSwitchCheck(ArrayList<Integer> connections, int numOfConnections){
-		ArrayList<Boolean> connectionUsed = new ArrayList<Boolean>(numOfConnections);
-
-		while(connectionUsed.contains(false)){
-
-
-		}//end while
-
-		return connections;
-	}//end method allSwitchCheck
-
 	private static class SwitchConnection{
 
-		int root;
-		int distanceToRoot;
-		int connectedBy;
+		int root; //switch that current switch regards as root
+		int distanceToRoot; //number of edges to root
+		int connectedBy; //switch connecting current switch to root
+
+		//holds all remote switches that this.switch is connected to
+		//		also used for port numbers. Index x = port number x + 1
 		ArrayList<Integer> connectedTo;
 
 		private SwitchConnection(){
@@ -286,11 +283,7 @@ public class SpanningTree_v2{
 			return connectedTo;
 		}//end method getConnectionList
 
-		//returns port number remote value is attached to
-		private int getPortNum(int value){
-			return connectedTo.indexOf(value) + 1;
-		}//end method getPortNum
-
+		//copies all data from passed in SwitchConnection object to this
 		private void copySwitch(SwitchConnection switchConnection){
 			this.root = switchConnection.getRoot();
 			this.distanceToRoot = switchConnection.getDistance();
