@@ -48,7 +48,7 @@ public class SpanningTree_v2{
 				if(lineArray[1].equals("R")){
 
 					connectionPairs = randomConfig(numOfSwitches);
-					System.out.println(connectionPairs);
+					System.out.println("Connection pairs: " + connectionPairs);
 				}
 
 				//else not random, connections are provided
@@ -56,7 +56,7 @@ public class SpanningTree_v2{
 
 					//parse connections from strings to integer pairs
 					int numOfConnections = lineArray.length - 1;
-					System.out.println("Number of connectin pairs: " +  numOfConnections);
+					//System.out.println("Number of connectin pairs: " +  numOfConnections);
 					connectionPairs = new ArrayList<Integer>();
 					for(int x = 1; x <= numOfConnections; x++){
 
@@ -127,13 +127,34 @@ public class SpanningTree_v2{
 					//real switchConnection array
 					// **only if change = true, meaning a change has been made
 					if(change == true){
-						System.out.println("\nIteration #" + iteration + " of line " + lineNum);
+						System.out.println("\n-----Iteration #" + iteration + " of line " + lineNum);
 						for(int x = 0; x < numOfSwitches; x++){
 							switches[x].copySwitch(switchesTemp[x]);
 							System.out.println("\nSwitch " + (x + 1) +  "\nRoot:" + switches[x].getRoot() +
 							"\nDistance to Root: " + switches[x].getDistance() + "\nConnectedBy: " + (switches[x].getConnection()));
 
 						}//end for
+					}//end if
+					
+					//if all switches have been connected to root
+					if(change == false){
+						System.out.println("\n******Final configuration for line " + lineNum);
+						for(int x = 0; x < numOfSwitches; x++){
+							
+							//gets port number current switch is using for connection to next switch
+							int portCurrent = switches[x].getConnectionList().indexOf(switches[x].getConnection()) + 1;
+							//gets port number next switch is using for connection to current switch
+							int portConnectedTo = switches[switches[x].getConnection() -1].getConnectionList().indexOf(x+1) + 1;
+							System.out.println("\nSwitch " + (x + 1) +  "\nRoot:" + switches[x].getRoot() +
+								"\nDistance to Root: " + switches[x].getDistance() + "\nConnectedBy: " + (switches[x].getConnection()));
+							
+							//don't consider root of all switches(it isn't "attached" to self)
+							if(x != 0){
+								System.out.println("\nUsing p" + portCurrent + " of " + (x+1) + 
+									" and p" + portConnectedTo + " of " + switches[x].getConnection());
+							}//end if
+						}//end for
+
 					}//end if
 					iteration++;
 				}//end while loop
@@ -171,7 +192,7 @@ public class SpanningTree_v2{
 				}//end while
 			}//end if
 			
-			System.out.println("Adding " + randomValue + " to connections");
+			//System.out.println("Adding " + randomValue + " to connections");
 			connections.add(randomValue);
 		}//end for
 
